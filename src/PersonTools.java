@@ -1,8 +1,12 @@
 public class PersonTools {
+
+    //parses splitted string formatted as "insert (optional)<name> (optional)<email>" +
+    //"(optional)<position> (optional)<organization>" +
+    //"(optional)<phone 1> (optional)<phone 2> ...\n"
     public static Person formFromCommand(String[] input){
         Person p = new Person();
         for(int i = 5; i < input.length; i++){
-            Integer phone = parsePhoneNumber(input[i]);
+            Long phone = parsePhoneNumber(input[i]);
             if(phone != null){
                 p.phone.add(phone);
             } else{
@@ -24,7 +28,7 @@ public class PersonTools {
         return p;
     }
 
-    public static Integer parsePhoneNumber(String s){
+    public static Long parsePhoneNumber(String s){
         if(s.isEmpty()) return null;
         if(s.charAt(0) == '+') {
             s = s.substring(1);
@@ -36,7 +40,7 @@ public class PersonTools {
             return null;
         }
         try {
-            return Integer.parseInt(s);
+            return Long.parseLong(s);
         } catch (Exception e){
             return null;
         }
@@ -60,7 +64,7 @@ public class PersonTools {
                 p.email = value;
                 return true;
             case "phone":
-                Integer phone = parsePhoneNumber(value);
+                Long phone = parsePhoneNumber(value);
                 if (phone != null) {
                     p.phone.add(phone);
                     return true;

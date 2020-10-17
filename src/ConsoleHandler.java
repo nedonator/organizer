@@ -22,18 +22,17 @@ public class ConsoleHandler {
         String[] args = command.split(" ");
         if(args.length == 0)return;
         switch(args[0]){
-            case "exit": App.terminate(); break;
+            case "exit":
+                App.terminate();
+                break;
             case "help":
-                System.out.println(guide);break;
+                System.out.println(guide);
+                break;
             case "insert":
                 Person p = PersonTools.formFromCommand(args);
-                if(database.add(p)) {
-                    System.out.println("New person is inserted");
-                    System.out.println(p);
-                }
-                else{
-                    System.out.println("Person is already exist");
-                }
+                database.add(p);
+                System.out.println("New person is inserted");
+                System.out.println(p);
                 break;
             case "update":
                 if(args.length != 4){
@@ -42,8 +41,19 @@ public class ConsoleHandler {
                 }
                 p = PersonTools.findPersonFromCommand(database, args);
                 if(p == null)break;
+                if(args[2].equals("phone")){
+                    Long phone = PersonTools.parsePhoneNumber(args[3]);
+                    if(phone != null){
+                        if(database.findByPhone(phone) != null){
+                            System.out.println("This phone number is already exist");
+                            break;
+                        }
+                        else{
+                            database.addPhone(phone, p);
+                        }
+                    }
+                }
                 if(PersonTools.update(p, args[2], args[3])) {
-                    database.update(p);
                     System.out.println("Person is updated");
                 }
                 System.out.println(p);
@@ -60,11 +70,13 @@ public class ConsoleHandler {
                 System.out.println(p);
                 break;
             case "list":
-                List<Person> list = new ArrayList<>(database.read());
+                List<Person> list = new ArrayList<>(database.getPersons());
                 for(int i = 1; i < args.length; i++){
                     PersonSorter.sort(list, args[i]);
                 }
-                System.out.println(list);
+                for(Person i : list){
+                    System.out.println(i);
+                }
                 break;
             case "find":
                 if(args.length == 3){
@@ -72,7 +84,7 @@ public class ConsoleHandler {
                         System.out.println("Find call is incorrect. See >help");
                         break;
                     }
-                    Integer phone = PersonTools.parsePhoneNumber(args[2]);
+                    Long phone = PersonTools.parsePhoneNumber(args[2]);
                     if(phone == null)break;
                     p = database.findByPhone(phone);
                     System.out.println(p);

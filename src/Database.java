@@ -6,67 +6,59 @@ import java.io.*;
 import java.util.*;
 
 public class Database {
+    //id - person
     private final Map<Integer, Person> persons;
-    private final Map<Integer, Person> personsByPhone;
+    //phone - person
+    private final Map<Long, Person> personsByPhone;
     private final File file;
 
     public Database(String filepath){
         persons = new HashMap<>();
         file = new File(filepath);
         personsByPhone = new HashMap<>();
-
     }
 
-    public boolean add(Person person){
-        boolean result = persons.put(person.id, person) == null;
-        if(result){
-            List<Integer> unUniquePhones = new ArrayList<>();
-            for(int phone : person.phone){
-                if(personsByPhone.containsKey(phone)){
-                    System.err.println("Phone " + phone +" of user " + person.id + " " + person.name + " is not unique\n"
-                    + "It will be removed");
-                    unUniquePhones.add(phone);
-                }
-                else{
-                    personsByPhone.put(phone, person);
-                }
-            }
-            person.phone.removeAll(unUniquePhones);
-        }
-        return result;
-    }
-
-    public boolean remove(Person person){
-        boolean result = persons.remove(person.id) != null;
-        if(result){
-            for(int phone : person.phone){
-                personsByPhone.remove(phone);
+    //adds new person to database. Its id must be unique
+    public void add(Person person) {
+        persons.put(person.id, person);
+        List<Long> unUniquePhones = new ArrayList<>();
+        for (long phone : person.phone) {
+            if (personsByPhone.containsKey(phone)) {
+                System.err.println("Phone " + phone + " of user " + person.id + " " + person.name + " is not unique\n"
+                        + "It will be removed");
+                unUniquePhones.add(phone);
+            } else {
+                personsByPhone.put(phone, person);
             }
         }
-        return result;
+        person.phone.removeAll(unUniquePhones);
     }
 
-    public Person findByPhone(int phone){
+    public void addPhone(long phone, Person person){
+        personsByPhone.put(phone, person);
+    }
+
+    public void remove(Person person) {
+        persons.remove(person.id);
+        for (long phone : person.phone) {
+            personsByPhone.remove(phone);
+        }
+    }
+
+    public Person findByPhone(long phone){
         return personsByPhone.get(phone);
     }
 
-    public boolean update(Person person){
-        boolean result = remove(person);
-        if(result){
-            add(person);
-        }
-        return result;
-    }
-
+    //save changes to file. should be called before the program ends
+    @SuppressWarnings("unchecked") //JSON library does not support generics
     public void writeToFile(){
         JSONArray json = new JSONArray();
         json.add(Person.getNextId());
         for(Map.Entry<Integer, Person> i : persons.entrySet()){
             json.add(JSONTools.personToJson(i.getValue()));
         }
-        try{
-            OutputStream os = new FileOutputStream(file);
-            os.write(json.toString().getBytes());
+        try(FileWriter fileWriter = new FileWriter(file)){
+            json.writeJSONString(fileWriter);
         } catch(IOException e){
             throw new RuntimeException(e);
         }
@@ -78,29 +70,28 @@ public class Database {
         personsByPhone.clear();
     }
 
-    public void readFromFile(){
+    //overwrite database with the file data. it makes empty database if file does not exist
+    //but fails if file format is wrong
+    public void readFromFile() {
         clear();
-        try{
-            if(!file.exists()){
-                file.createNewFile();
-            }
-            else {
-                InputStream is = new FileInputStream(file);
+        if (file.exists()) {
+            try(InputStream is = new FileInputStream(file)) {
                 Object o = new JSONParser().parse(new String(is.readAllBytes()));
                 JSONArray json = (JSONArray) o;
-                Iterator it = json.iterator();
+                @SuppressWarnings("rawtypes") Iterator it = json.iterator();  //JSON library does not support generics
                 Person.setNextId(Integer.parseInt(it.next().toString()));
                 while (it.hasNext()) {
                     Object p = it.next();
                     add(JSONTools.JSONToPerson((JSONObject) p));
                 }
+            } catch (Exception e) {
+                throw new RuntimeException(e);
             }
-        } catch(Exception e){
-            throw new RuntimeException(e);
         }
     }
 
-    public Collection<Person> read(){
+    //returns all persons
+    public Collection<Person> getPersons(){
         return persons.values();
     }
 

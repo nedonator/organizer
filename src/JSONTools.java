@@ -10,11 +10,12 @@ public class JSONTools {
         person.email = json.get("email").toString();
         JSONArray phones = (JSONArray) json.get("phone");
         for(Object o : phones){
-            person.phone.add(Integer.parseInt(o.toString()));
+            person.phone.add(Long.parseLong(o.toString()));
         }
         return person;
     }
 
+    @SuppressWarnings("unchecked") //JSON library does not support generics
     public static JSONObject personToJson(Person person){
         JSONObject json = new JSONObject();
         json.put("id", person.id);

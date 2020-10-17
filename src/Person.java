@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 
+//all fields except id can be modified without creating new object. It means that all local changes
+//are visible throughout the program
 public class Person {
     private static int freeId = 0;
 
@@ -9,37 +11,22 @@ public class Person {
     public String position;
     public String organization;
     public String email;
-    public final List<Integer> phone;
+    public final List<Long> phone;
 
-    Person(int id){
+    public Person(int id){
         this.id = id;
         phone = new ArrayList<>();
-    }
-
-    public Person(){
-        this(freeId++);
-        if(freeId == 0)
-            throw new RuntimeException("Out of unique ids");
         name = "";
         organization = "";
         position = "";
         email = "";
     }
 
-    public Person(String name, String position, String organization, String email) {
-        this();
-        this.name = name;
-        this.position = position;
-        this.organization = organization;
-        this.email = email;
+    public Person(){
+        this(freeId++);
+        if(freeId == 0)
+            throw new RuntimeException("Out of unique ids");
     }
-
-    public Person(String name, String position, String organization, String email, int phone) {
-        this(name, position, organization, email);
-        this.phone.add(phone);
-    }
-
-
 
     @Override
     public int hashCode() {
