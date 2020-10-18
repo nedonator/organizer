@@ -9,6 +9,7 @@ public class ConsoleHandler {
             "(optional)<phone 1> (optional)<phone 2> ...\n" +
             "delete <id>\n" +
             "find <id>\n" +
+            "update <id> <field> <value>\n" +
             "find phone <phone>\n" +
             "list (optional)<field 1> (optional)<field 2> ...\n" +
             "help\n" +
@@ -80,7 +81,7 @@ public class ConsoleHandler {
                 break;
             case "find":
                 if(args.length == 3){
-                    if(!args[1].equals("phone")){
+                    if(!args[1].equals("phone")) {
                         System.out.println("Find call is incorrect. See >help");
                         break;
                     }

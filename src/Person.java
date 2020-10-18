@@ -2,7 +2,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 //all fields except id can be modified without creating new object. It means that all local changes
-//are visible throughout the program
+//are visible throughout the program. Please note: Database.addPhone() should be called every time
+//new phone is added if database contains person
 public class Person {
     private static int freeId = 0;
 
